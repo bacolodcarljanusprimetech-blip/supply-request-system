@@ -1,0 +1,1935 @@
+# SUPPLY REQUEST & INVENTORY MANAGEMENT SYSTEM
+
+## 1. PROJECT OBJECTIVE
+
+Build a lightweight, mobile-first web-based Supply Request and Inventory Management System for internal company use.
+
+The purpose of the system is to allow employees to request office supplies through a web form accessed primarily by scanning a QR code.
+
+The system must manage the complete lifecycle of a supply request:
+
+REQUESTOR → APPROVER → RECEIVER → RELEASED
+
+The system must also maintain office supply inventory and provide simple management metrics such as:
+
+* Requests by department
+* Requests by requestor
+* Most requested supplies
+* Supply consumption
+* Request status
+* Monthly request trends
+* Low-stock supplies
+* Out-of-stock supplies
+
+The application must prioritize:
+
+* Lightweight performance
+* Low resource consumption
+* Simple UI
+* Mobile compatibility
+* Easy maintenance
+* Secure role-based access
+* Clean database structure
+* Vercel deployment
+* Supabase backend
+
+Do not over-engineer the application.
+
+---
+
+# 2. IMPORTANT DEVELOPMENT RULES
+
+Before starting development:
+
+1. Inspect the existing project structure if a project already exists.
+2. Do not overwrite existing working functionality without understanding it first.
+3. Do not install unnecessary dependencies.
+4. Before installing ANY new dependency, ask the user for approval.
+5. Explain why the dependency is needed before requesting installation.
+6. Prefer native Next.js, React, TypeScript, Supabase, and browser APIs whenever possible.
+7. Do not introduce a new library if the requirement can reasonably be implemented using the existing stack.
+8. Keep the application lightweight.
+9. Avoid unnecessary animations.
+10. Avoid large image assets.
+11. Avoid video backgrounds.
+12. Avoid 3D graphics.
+13. Avoid heavy dashboard effects.
+14. Avoid unnecessary state-management libraries.
+15. Do not use Redux unless explicitly requested.
+16. Do not use Prisma unless explicitly requested.
+17. Do not create a separate Express backend.
+18. Do not create a separate Node.js server.
+19. Do not use Docker unless explicitly requested.
+20. Do not add unnecessary UI component libraries.
+
+The final application should be optimized for low-spec office computers and low-to-mid-range mobile devices.
+
+---
+
+# 3. TECHNOLOGY STACK
+
+Use the following stack.
+
+## Frontend
+
+* Next.js
+* TypeScript
+* React
+* Tailwind CSS
+* shadcn/ui components only when useful
+* Lucide React icons
+
+## Backend
+
+Supabase:
+
+* PostgreSQL
+* Supabase Authentication
+* Row Level Security
+* Supabase Storage only if a future requirement requires file attachments
+
+## Charts
+
+Use Recharts only for simple dashboard metrics.
+
+Do not build complex graphical dashboards.
+
+## QR
+
+Use a lightweight QR-code library only if needed.
+
+The primary QR code should point to the public supply request page.
+
+## Deployment
+
+GitHub → Vercel
+
+Supabase will host the backend/database.
+
+---
+
+# 4. APPLICATION USER ROLES
+
+There are four roles.
+
+## ROLE 1 — REQUESTOR
+
+The requestor is an employee who requests supplies.
+
+Permissions:
+
+* Login
+* Create supply request
+* Add multiple supply items
+* Specify quantity
+* Add purpose
+* Add remarks
+* Submit request
+* View own requests
+* View own request status
+* View own request history
+
+Requestors cannot:
+
+* Approve requests
+* Reject requests
+* Modify inventory
+* Release supplies
+* View other employees' private requests unless explicitly permitted later
+
+---
+
+# ROLE 2 — APPROVER
+
+The approver reviews requests.
+
+Permissions:
+
+* View pending requests
+* View request details
+* View requestor information
+* View department
+* View requested supplies
+* View current inventory
+* Approve request
+* Partially approve quantities
+* Reject request
+* Add approval remarks
+* View request history
+* View inventory
+
+The approver cannot directly release supplies.
+
+---
+
+# ROLE 3 — RECEIVER
+
+The receiver handles the final release of supplies.
+
+Permissions:
+
+* View approved requests
+* View request details
+* View approved quantities
+* View current inventory
+* Approve/reject release
+* Release supplies
+* Add release remarks
+* Confirm released quantity
+* View release history
+* View inventory
+
+Inventory must only be deducted when the receiver confirms the actual release.
+
+---
+
+# ROLE 4 — ADMINISTRATOR
+
+The administrator manages the system.
+
+Permissions:
+
+* Manage users
+* Assign roles
+* Manage departments
+* Manage supplies
+* Manage supply categories
+* Add inventory
+* Adjust inventory
+* Set minimum stock levels
+* View all requests
+* View all inventory
+* View analytics
+* View audit logs
+* Manage system configuration
+
+The administrator should not normally be involved in the normal request approval workflow unless explicitly required.
+
+---
+
+# 5. REQUEST WORKFLOW
+
+The primary workflow must be:
+
+REQUESTOR
+↓
+SUBMIT REQUEST
+↓
+REQUEST NUMBER GENERATED
+↓
+FOR APPROVAL
+↓
+APPROVER REVIEW
+↓
+APPROVED / REJECTED
+↓
+IF APPROVED
+↓
+FOR RELEASE
+↓
+RECEIVER REVIEW
+↓
+RELEASED / REJECTED
+↓
+IF RELEASED
+↓
+INVENTORY DEDUCTED
+↓
+COMPLETED
+
+Use these standardized statuses:
+
+* DRAFT
+* FOR_APPROVAL
+* APPROVED
+* REJECTED
+* FOR_RELEASE
+* RELEASED
+* COMPLETED
+
+If necessary, support:
+
+* RETURNED
+
+for requests that require correction.
+
+---
+
+# 6. REQUEST NUMBER
+
+Request numbers must be generated automatically by the system.
+
+Do not allow users to manually enter request numbers.
+
+Preferred format:
+
+SR-YYYY-MM-XXX
+
+Example:
+
+SR-2026-09-001
+SR-2026-09-002
+SR-2026-09-003
+
+If the existing company requirement specifically requires another format such as:
+
+09-001-MM
+
+make the request-number format configurable.
+
+Request numbers must be unique.
+
+Generate the number only after successful request submission.
+
+---
+
+# 7. REQUESTOR EXPERIENCE
+
+The requestor experience must be mobile-first.
+
+Primary workflow:
+
+SCAN QR CODE
+↓
+OPEN SUPPLY REQUEST PAGE
+↓
+LOGIN IF REQUIRED
+↓
+FILL FORM
+↓
+SUBMIT
+
+The form should be simple and fast.
+
+Example:
+
+SUPPLY REQUEST
+
+Requestor:
+Automatically populated
+
+Employee ID:
+Automatically populated
+
+Department:
+Automatically populated
+
+Date:
+Automatically populated
+
+Purpose:
+[ Input ]
+
+Requested Supplies:
+
+Supply:
+[ Select Supply ]
+
+Quantity:
+[ Input ]
+
+[ + ADD SUPPLY ]
+
+Additional Remarks:
+[ Text area ]
+
+[ SUBMIT REQUEST ]
+
+After submission:
+
+Show:
+
+Request Submitted Successfully
+
+Request Number:
+SR-2026-09-001
+
+Status:
+FOR APPROVAL
+
+---
+
+# 8. SUPPLY SELECTION
+
+Do not allow users to freely type supply names.
+
+Use a controlled Supply Masterlist.
+
+Example:
+
+Office Supplies:
+
+* Ballpen
+* Pencil
+* Folder
+* Envelope
+* Stapler
+* Staple Wire
+* Marker
+* Bond Paper
+
+Adhesives:
+
+* Masking Tape
+* Duct Tape
+* Double-Sided Tape
+* Glue
+
+Printing:
+
+* Printer Ink
+* Toner
+* Bond Paper
+
+The administrator can add/edit/deactivate supplies.
+
+---
+
+# 9. MULTIPLE ITEMS PER REQUEST
+
+A request can contain multiple supplies.
+
+Example:
+
+Request SR-2026-09-001
+
+| Supply    | Requested |
+| --------- | --------: |
+| Ballpen   |        10 |
+| Folder    |         5 |
+| Duct Tape |         2 |
+
+The user must be able to:
+
+* Add item
+* Remove item
+* Change quantity
+
+Do not create a separate request for every supply item.
+
+---
+
+# 10. PARTIAL APPROVAL
+
+The approver must be able to approve a different quantity from the requested quantity.
+
+Example:
+
+Requested:
+
+Ballpen = 20
+
+Available:
+
+Ballpen = 10
+
+Approver can approve:
+
+Ballpen = 10
+
+The request item must store:
+
+* Requested quantity
+* Approved quantity
+* Released quantity
+
+Example:
+
+| Supply  | Requested | Approved | Released |
+| ------- | --------: | -------: | -------: |
+| Ballpen |        20 |       10 |       10 |
+| Folder  |         5 |        5 |        5 |
+
+---
+
+# 11. INVENTORY RULE
+
+This is critical.
+
+Do NOT deduct inventory when the request is submitted.
+
+Do NOT deduct inventory when the approver approves the request.
+
+Only deduct inventory when the receiver confirms the actual release.
+
+Example:
+
+Current stock:
+
+Ballpen = 150
+
+Request:
+
+10 Ballpens
+
+Approver approves:
+
+10
+
+Inventory remains:
+
+150
+
+Receiver releases:
+
+10
+
+Inventory becomes:
+
+140
+
+Every inventory change must create an inventory transaction record.
+
+---
+
+# 12. INVENTORY MANAGEMENT
+
+Each supply must contain:
+
+* Supply ID
+* Supply name
+* Category
+* Unit
+* Current stock
+* Minimum stock
+* Active/inactive status
+* Created date
+
+Example:
+
+Ballpen
+
+Category:
+Office Supplies
+
+Unit:
+pcs
+
+Current Stock:
+150
+
+Minimum Stock:
+30
+
+Status:
+AVAILABLE
+
+Automatically determine:
+
+AVAILABLE
+LOW STOCK
+OUT OF STOCK
+
+Example:
+
+Current stock > minimum stock:
+
+AVAILABLE
+
+Current stock <= minimum stock:
+
+LOW STOCK
+
+Current stock = 0:
+
+OUT OF STOCK
+
+---
+
+# 13. INVENTORY TRANSACTIONS
+
+Maintain an inventory transaction history.
+
+Transaction types:
+
+* STOCK_IN
+* STOCK_OUT
+* ADJUSTMENT
+* RELEASE
+* RETURN
+
+Example:
+
+Ballpen
+
+150 → Initial stock
+
+-10 → Released through SR-2026-09-001
+
++100 → New stock received
+
+Current:
+
+240
+
+Every transaction should contain:
+
+* Supply
+* Transaction type
+* Quantity
+* Reference request if applicable
+* User who performed action
+* Timestamp
+* Remarks
+
+---
+
+# 14. APPROVER DASHBOARD
+
+The approver dashboard should contain:
+
+Summary cards:
+
+* Pending Approval
+* Approved
+* Rejected
+* For Release
+* Inventory Items
+* Low Stock
+
+Main table:
+
+Request Number
+Requestor
+Department
+Date
+Items
+Status
+Action
+
+Example:
+
+SR-2026-09-001
+Juan Dela Cruz
+Sales
+Sep 28
+5 items
+FOR APPROVAL
+
+Actions:
+
+[ VIEW ]
+
+Request detail page:
+
+Requestor Information
+
+Request Number
+Requestor
+Employee ID
+Department
+Date
+Purpose
+Remarks
+
+Requested Supplies
+
+Supply
+Requested Qty
+Available Stock
+Approved Qty
+
+Actions:
+
+[ APPROVE ]
+[ REJECT ]
+[ RETURN ]
+
+If rejecting or returning, require remarks.
+
+---
+
+# 15. RECEIVER DASHBOARD
+
+The receiver dashboard should show:
+
+* For Release
+* Released Today
+* Rejected
+* Low Stock
+* Out of Stock
+
+Main table:
+
+Request Number
+Requestor
+Department
+Approved Items
+Approval Date
+Status
+Action
+
+Request detail:
+
+Request Number
+Requestor
+Department
+Approved Supplies
+
+Supply
+Approved Qty
+Current Stock
+Release Qty
+
+The receiver must confirm actual released quantities.
+
+Example:
+
+Approved:
+
+10 Ballpens
+
+Actual released:
+
+8 Ballpens
+
+The system records:
+
+Approved quantity = 10
+Released quantity = 8
+
+Inventory deducts only 8.
+
+---
+
+# 16. RELEASE CONFIRMATION
+
+When releasing supplies, display:
+
+RELEASE SUPPLIES
+
+Request Number:
+SR-2026-09-001
+
+Requestor:
+Juan Dela Cruz
+
+Items:
+
+Ballpen
+Approved: 10
+Release: [10]
+
+Folder
+Approved: 5
+Release: [5]
+
+Receiver Remarks:
+[ Text ]
+
+[ CONFIRM RELEASE ]
+
+After confirmation:
+
+Status:
+RELEASED
+
+Inventory is updated.
+
+---
+
+# 17. REQUESTOR REQUEST HISTORY
+
+Requestors should have a simple history page.
+
+Example:
+
+| Request        | Date   | Items | Status       |
+| -------------- | ------ | ----- | ------------ |
+| SR-2026-09-001 | Sep 28 | 5     | FOR APPROVAL |
+| SR-2026-09-002 | Sep 25 | 3     | RELEASED     |
+| SR-2026-09-003 | Sep 20 | 2     | REJECTED     |
+
+Clicking a request opens its details and approval history.
+
+---
+
+# 18. REQUEST TIMELINE
+
+Every request should have a visual but lightweight timeline.
+
+Example:
+
+SUBMITTED
+✓ Sep 28, 9:10 AM
+
+APPROVED
+✓ Sep 28, 9:35 AM
+Maria Santos
+
+FOR RELEASE
+✓ Sep 28, 9:36 AM
+
+RELEASED
+✓ Sep 28, 10:10 AM
+Pedro Cruz
+
+This should use simple icons and CSS, not a heavy animation library.
+
+---
+
+# 19. APPROVAL HISTORY
+
+Store every approval action.
+
+Example:
+
+Request:
+SR-2026-09-001
+
+Submitted:
+Juan Dela Cruz
+Sep 28, 9:10 AM
+
+Approved:
+Maria Santos
+Sep 28, 9:35 AM
+
+Released:
+Pedro Cruz
+Sep 28, 10:10 AM
+
+Include remarks where applicable.
+
+---
+
+# 20. REJECTION
+
+When rejecting a request, require a reason.
+
+Possible reasons:
+
+* Insufficient Inventory
+* Incorrect Quantity
+* Unauthorized Request
+* Duplicate Request
+* Other
+
+Allow additional remarks.
+
+Never allow a rejection without recording who rejected it and when.
+
+---
+
+# 21. ANALYTICS / METRICS
+
+Create a lightweight Analytics page.
+
+The analytics should focus on useful management information.
+
+Required metrics:
+
+1. Total Requests
+2. Pending Requests
+3. Approved Requests
+4. Rejected Requests
+5. Released Requests
+6. Requests by Department
+7. Requests by Requestor
+8. Most Requested Supplies
+9. Released Supplies
+10. Monthly Request Trend
+11. Low Stock Supplies
+12. Out-of-Stock Supplies
+
+---
+
+# 22. ANALYTICS FILTERS
+
+Provide filters:
+
+Date Range:
+
+* Today
+* This Week
+* This Month
+* Last Month
+* This Year
+* Custom Range
+
+Department:
+
+* All Departments
+* Specific Department
+
+Requestor:
+
+* All Requestors
+* Specific Requestor
+
+Supply:
+
+* All Supplies
+* Specific Supply
+
+Supply Category:
+
+* All Categories
+* Specific Category
+
+Filters should update the displayed metrics.
+
+---
+
+# 23. REQUESTS BY DEPARTMENT
+
+Show a simple bar chart.
+
+Example:
+
+Sales
+85
+
+Marketing
+56
+
+Operations
+43
+
+Finance
+27
+
+IT
+18
+
+HR
+16
+
+Use Recharts.
+
+Do not create complicated visualizations.
+
+---
+
+# 24. REQUESTS BY REQUESTOR
+
+Show a simple table.
+
+Requestor
+Department
+Total Requests
+Approved
+Rejected
+Released
+
+Allow sorting by request count.
+
+Do not present this as an employee performance ranking.
+
+The purpose is to show request activity and help with supply planning.
+
+---
+
+# 25. MOST REQUESTED SUPPLIES
+
+Show:
+
+Supply
+Requested Quantity
+Released Quantity
+Number of Requests
+
+Example:
+
+Ballpen
+350 requested
+320 released
+75 requests
+
+Folder
+210 requested
+205 released
+52 requests
+
+---
+
+# 26. DEPARTMENT SUPPLY USAGE
+
+Allow management to select a department and see:
+
+Department:
+Sales
+
+Supply
+Requested
+Released
+
+Ballpen
+120
+110
+
+Folder
+85
+80
+
+Duct Tape
+32
+30
+
+This helps identify department supply consumption.
+
+---
+
+# 27. MONTHLY TREND
+
+Create a simple line chart:
+
+January
+February
+March
+April
+etc.
+
+Display number of requests per month.
+
+Allow the user to change the date range.
+
+---
+
+# 28. INVENTORY METRICS
+
+Display:
+
+Total Active Supplies
+Available Supplies
+Low Stock
+Out of Stock
+
+Example:
+
+84 Active Supplies
+
+72 Available
+
+9 Low Stock
+
+3 Out of Stock
+
+---
+
+# 29. DATABASE STRUCTURE
+
+Use Supabase PostgreSQL.
+
+Create the following tables.
+
+## profiles
+
+Fields:
+
+id
+employee_id
+full_name
+email
+department_id
+role
+is_active
+created_at
+updated_at
+
+Roles:
+
+REQUESTOR
+APPROVER
+RECEIVER
+ADMIN
+
+---
+
+## departments
+
+Fields:
+
+id
+name
+is_active
+created_at
+
+---
+
+## supply_categories
+
+Fields:
+
+id
+name
+is_active
+created_at
+
+---
+
+## supplies
+
+Fields:
+
+id
+name
+category_id
+unit
+current_stock
+minimum_stock
+is_active
+created_at
+updated_at
+
+---
+
+## requests
+
+Fields:
+
+id
+request_number
+requestor_id
+department_id
+status
+purpose
+remarks
+created_at
+submitted_at
+updated_at
+
+---
+
+## request_items
+
+Fields:
+
+id
+request_id
+supply_id
+requested_quantity
+approved_quantity
+released_quantity
+created_at
+updated_at
+
+---
+
+## request_approvals
+
+Fields:
+
+id
+request_id
+approver_id
+action
+remarks
+created_at
+
+Actions:
+
+APPROVED
+REJECTED
+RETURNED
+
+---
+
+## request_releases
+
+Fields:
+
+id
+request_id
+receiver_id
+action
+remarks
+released_at
+
+Actions:
+
+RELEASED
+REJECTED
+
+---
+
+## inventory_transactions
+
+Fields:
+
+id
+supply_id
+transaction_type
+quantity
+reference_request_id
+performed_by
+remarks
+created_at
+
+---
+
+## audit_logs
+
+Fields:
+
+id
+user_id
+action
+entity_type
+entity_id
+metadata
+created_at
+
+---
+
+# 30. DATABASE RELATIONSHIPS
+
+Use proper foreign keys.
+
+profiles
+↓
+departments
+
+profiles
+↓
+requests
+
+requests
+↓
+request_items
+
+request_items
+↓
+supplies
+
+requests
+↓
+request_approvals
+
+requests
+↓
+request_releases
+
+supplies
+↓
+inventory_transactions
+
+Do not duplicate unnecessary data.
+
+---
+
+# 31. ROW LEVEL SECURITY
+
+Supabase Row Level Security must be enabled.
+
+Users must only be allowed to perform actions appropriate to their role.
+
+REQUESTOR:
+
+Can view own requests.
+
+APPROVER:
+
+Can view requests requiring approval.
+
+RECEIVER:
+
+Can view approved requests requiring release.
+
+ADMIN:
+
+Can manage all relevant records.
+
+Do not rely only on frontend role checks for security.
+
+Security must also be enforced at the Supabase/database level.
+
+---
+
+# 32. AUTHENTICATION
+
+Use Supabase Authentication.
+
+Prefer company email authentication.
+
+After login, load the user's profile and role.
+
+The application should redirect users to the correct dashboard.
+
+Example:
+
+REQUESTOR
+→ /my-requests
+
+APPROVER
+→ /approver
+
+RECEIVER
+→ /receiver
+
+ADMIN
+→ /admin
+
+Do not expose admin pages to unauthorized users.
+
+---
+
+# 33. QR CODE
+
+Create a QR code for the public/request entry page.
+
+Example:
+
+https://your-domain.com/request
+
+The QR code should be printable and usable from a phone.
+
+The request page must be optimized for mobile.
+
+The QR should not contain sensitive data.
+
+---
+
+# 34. UI DESIGN
+
+Keep the UI minimal and professional.
+
+Design principles:
+
+* Mobile-first
+* Clean white/neutral background
+* Simple cards
+* Simple borders
+* Clear typography
+* Small number of colors
+* Clear status badges
+* Minimal animations
+* No unnecessary decorative graphics
+
+The system should feel like an internal business application rather than a marketing website.
+
+---
+
+# 35. MOBILE REQUEST PAGE
+
+The request page should prioritize mobile.
+
+Use:
+
+* Large touch-friendly inputs
+* Select/dropdown for supplies
+* Numeric quantity field
+* Large submit button
+* Minimal scrolling
+* Clear validation messages
+
+Avoid dense desktop-style tables on the mobile request form.
+
+---
+
+# 36. DESKTOP ADMIN UI
+
+Dashboards can use:
+
+Sidebar:
+
+Dashboard
+Requests
+Inventory
+Analytics
+Users
+Departments
+Supplies
+Audit Logs
+Settings
+
+Main content:
+
+Dashboard cards
+Tables
+Charts
+
+Keep the sidebar simple.
+
+---
+
+# 37. RESPONSIVE DESIGN
+
+The application must work on:
+
+* Mobile phones
+* Tablets
+* Laptops
+* Desktop computers
+
+Do not create separate applications for mobile and desktop.
+
+Use responsive CSS.
+
+---
+
+# 38. PERFORMANCE REQUIREMENTS
+
+Optimize for low-spec hardware.
+
+Requirements:
+
+* Minimize client-side JavaScript
+* Prefer server-side rendering/data fetching where appropriate
+* Avoid unnecessary React state
+* Avoid unnecessary re-renders
+* Paginate large tables
+* Lazy-load analytics charts if appropriate
+* Do not load charts on pages that don't need them
+* Optimize icons
+* Avoid large images
+* Avoid video
+* Avoid background animations
+* Avoid heavy third-party libraries
+
+The request form should load quickly even on a basic mobile phone.
+
+---
+
+# 39. DO NOT STORE METRICS SEPARATELY
+
+Do not create separate tables such as:
+
+department_metrics
+requestor_metrics
+monthly_metrics
+
+Metrics should be calculated from the actual request and inventory data.
+
+Use PostgreSQL queries/views where appropriate.
+
+Example:
+
+GROUP BY department_id
+
+GROUP BY requestor_id
+
+GROUP BY supply_id
+
+GROUP BY date/month
+
+This prevents duplicate data.
+
+---
+
+# 40. AUDIT LOGGING
+
+Record important actions.
+
+Examples:
+
+USER_LOGIN
+REQUEST_CREATED
+REQUEST_SUBMITTED
+REQUEST_APPROVED
+REQUEST_REJECTED
+REQUEST_RETURNED
+RELEASE_APPROVED
+SUPPLY_RELEASED
+INVENTORY_ADDED
+INVENTORY_ADJUSTED
+USER_CREATED
+ROLE_CHANGED
+
+Store:
+
+Who
+What
+When
+Related record
+
+---
+
+# 41. ERROR HANDLING
+
+Provide user-friendly errors.
+
+Examples:
+
+"Unable to submit request. Please try again."
+
+"Insufficient inventory."
+
+"Your session has expired. Please log in again."
+
+"Please add at least one supply."
+
+"Quantity must be greater than zero."
+
+Do not expose database errors or sensitive technical information to normal users.
+
+Log technical errors appropriately for development.
+
+---
+
+# 42. FORM VALIDATION
+
+Validate on both:
+
+Frontend
+AND
+Server/database layer
+
+Required:
+
+* Supply
+* Quantity
+* Purpose where required
+
+Quantity must be:
+
+* Numeric
+* Greater than zero
+* Whole number where applicable
+
+Prevent duplicate item rows for the same supply within one request unless there is a clear reason to allow them.
+
+---
+
+# 43. INVENTORY SAFETY
+
+Prevent inventory from becoming negative.
+
+Example:
+
+Current stock:
+5
+
+Release request:
+8
+
+The system must not allow the inventory to become:
+
+-3
+
+The release must either:
+
+* reject the quantity
+* allow a corrected quantity
+* require administrator override
+
+---
+
+# 44. CONCURRENCY
+
+The inventory update must be handled safely.
+
+If two receivers/processes attempt to release the same supply simultaneously, prevent incorrect inventory calculations.
+
+Use a server-side/database transaction or PostgreSQL function for the final inventory deduction.
+
+Do not rely only on frontend calculations.
+
+---
+
+# 45. REPORT EXPORT
+
+This can be Phase 2.
+
+Potential exports:
+
+* Request list → CSV
+* Inventory → CSV
+* Monthly report → CSV
+* Supply consumption → CSV
+
+Do not add PDF generation unless it is actually required.
+
+The request itself can remain as a web record.
+
+---
+
+# 46. NOTIFICATIONS
+
+Phase 1:
+
+Use in-app status updates.
+
+Phase 2:
+
+Add email notifications.
+
+Potential notifications:
+
+Request submitted
+Request approved
+Request rejected
+Request ready for release
+Supply released
+Low stock alert
+
+Do not introduce an external notification service unless required.
+
+---
+
+# 47. PROJECT STRUCTURE
+
+Keep the Next.js project organized.
+
+Suggested structure:
+
+app/
+├── login/
+├── request/
+├── my-requests/
+├── approver/
+├── receiver/
+├── admin/
+│   ├── users/
+│   ├── supplies/
+│   ├── inventory/
+│   ├── departments/
+│   └── audit-logs/
+├── analytics/
+└── api/
+
+components/
+├── ui/
+├── forms/
+├── tables/
+├── dashboard/
+├── inventory/
+└── requests/
+
+lib/
+├── supabase/
+├── auth/
+├── permissions/
+├── inventory/
+├── requests/
+└── analytics/
+
+types/
+└── database.ts
+
+---
+
+# 48. DEVELOPMENT PHASES
+
+Do not attempt to build everything simultaneously.
+
+## PHASE 1 — FOUNDATION
+
+Build:
+
+* Next.js project
+* TypeScript
+* Tailwind
+* Supabase connection
+* Authentication
+* Basic layout
+* Role system
+* Database schema
+
+Do not proceed to complex analytics until authentication and database functionality work.
+
+---
+
+## PHASE 2 — REQUESTOR
+
+Build:
+
+* QR request page
+* Login
+* Request form
+* Supply selection
+* Multiple items
+* Request submission
+* Request number generation
+* Request history
+* Request details
+
+Test thoroughly.
+
+---
+
+## PHASE 3 — APPROVER
+
+Build:
+
+* Approver dashboard
+* Pending request list
+* Request details
+* Inventory visibility
+* Approve
+* Partial approval
+* Reject
+* Return
+* Approval history
+
+---
+
+## PHASE 4 — RECEIVER
+
+Build:
+
+* Receiver dashboard
+* Approved request list
+* Release form
+* Release confirmation
+* Released quantity
+* Inventory deduction
+* Release history
+
+---
+
+## PHASE 5 — INVENTORY
+
+Build:
+
+* Supply masterlist
+* Categories
+* Stock levels
+* Stock-in
+* Adjustments
+* Inventory transactions
+* Low stock
+* Out of stock
+
+---
+
+## PHASE 6 — ANALYTICS
+
+Build:
+
+* Summary cards
+* Requests by department
+* Requests by requestor
+* Most requested supplies
+* Released supplies
+* Monthly trends
+* Inventory health
+* Filters
+
+Use lightweight Recharts charts only where useful.
+
+---
+
+## PHASE 7 — AUDIT & SECURITY
+
+Verify:
+
+* RLS
+* Role permissions
+* Audit logs
+* Unauthorized route protection
+* Inventory concurrency
+* Request status transitions
+* Authentication expiration
+
+---
+
+## PHASE 8 — TESTING
+
+Test the complete workflow:
+
+REQUESTOR
+↓
+SUBMIT
+↓
+APPROVER
+↓
+APPROVE
+↓
+RECEIVER
+↓
+RELEASE
+↓
+INVENTORY UPDATED
+
+Also test:
+
+* Rejection
+* Partial approval
+* Insufficient inventory
+* Duplicate submissions
+* Multiple simultaneous requests
+* Unauthorized access
+* Mobile layout
+* Desktop layout
+
+---
+
+# 49. REQUEST STATUS RULES
+
+Implement strict status transitions.
+
+Allowed:
+
+DRAFT → FOR_APPROVAL
+
+FOR_APPROVAL → APPROVED
+
+FOR_APPROVAL → REJECTED
+
+FOR_APPROVAL → RETURNED
+
+RETURNED → FOR_APPROVAL
+
+APPROVED → FOR_RELEASE
+
+FOR_RELEASE → RELEASED
+
+FOR_RELEASE → REJECTED
+
+Do not allow arbitrary status changes from the frontend.
+
+---
+
+# 50. DESIGN PRIORITY
+
+The system priority is:
+
+1. Correctness
+2. Security
+3. Reliability
+4. Performance
+5. Maintainability
+6. Usability
+7. Visual appearance
+
+Do not sacrifice database integrity or security just to make the UI visually impressive.
+
+---
+
+# 51. FINAL ACCEPTANCE CRITERIA
+
+The project is considered functional when:
+
+### Requestor
+
+A requestor can:
+
+* Login
+* Open the request page
+* Select supplies
+* Enter quantities
+* Submit a request
+* Receive an automatically generated request number
+* View request status
+* View request history
+
+### Approver
+
+An approver can:
+
+* Login
+* View pending requests
+* View inventory
+* Approve
+* Partially approve
+* Reject
+* Add remarks
+
+### Receiver
+
+A receiver can:
+
+* Login
+* View approved requests
+* Review approved quantities
+* Enter actual release quantities
+* Confirm release
+* Update inventory
+
+### Inventory
+
+The system can:
+
+* Maintain supply masterlist
+* Maintain stock
+* Record inventory transactions
+* Prevent negative inventory
+* Detect low stock
+* Detect out of stock
+
+### Analytics
+
+The system can:
+
+* Count requests
+* Group requests by department
+* Group requests by requestor
+* Group requests by supply
+* Calculate released quantities
+* Display monthly trends
+* Display inventory health
+
+### Security
+
+The system:
+
+* Uses Supabase Authentication
+* Uses Row Level Security
+* Enforces role permissions
+* Protects admin functions
+* Records important actions
+
+---
+
+# 52. IMPORTANT: DO NOT OVERBUILD
+
+This is an internal supply management system.
+
+Do not turn it into an ERP.
+
+Do not add:
+
+* Payroll
+* Accounting
+* Purchasing management
+* Vendor management
+* Complex warehouse management
+* Complex forecasting
+* AI recommendations
+* Real-time 3D dashboards
+* Complex notification infrastructure
+* Unnecessary microservices
+
+Build the requested supply request → approval → release → inventory workflow first.
+
+The system should remain small, fast, understandable, and easy for an internal IT team to maintain.
+
+---
+
+# 53. DEPLOYMENT TARGET
+
+Final architecture:
+
+GitHub
+↓
+Vercel
+↓
+Next.js
+↓
+Supabase
+↓
+PostgreSQL
+
+The project should be deployable to Vercel without requiring:
+
+* VPS
+* Docker
+* Nginx
+* Separate backend server
+* Dedicated server process
+
+Environment variables must be stored through Vercel Environment Variables.
+
+Never commit Supabase secrets or service-role keys to GitHub.
+
+---
+
+# 54. BEFORE IMPLEMENTATION
+
+Before writing significant code:
+
+1. Inspect the existing project.
+2. Confirm the current Next.js/React/TypeScript setup.
+3. Identify existing dependencies.
+4. Identify dependencies that are already installed.
+5. Propose the Supabase database schema.
+6. Explain any dependencies that need to be installed.
+7. Ask for confirmation before installing new dependencies.
+8. Build incrementally by phase.
+9. Test each phase before proceeding.
+10. Do not silently introduce additional technologies.
+
+When a requirement is ambiguous, stop and ask the user rather than making a major architectural assumption.
+
+The goal is a **lightweight, secure, maintainable internal Supply Request and Inventory Management System**, not a complex enterprise platform.
